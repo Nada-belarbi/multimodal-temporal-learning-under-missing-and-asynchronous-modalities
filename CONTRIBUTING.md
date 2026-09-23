@@ -2,7 +2,7 @@
 
 ## Assign responsibilities
 
-The five roles are not assigned yet. Choose one primary owner per role, then set the GitHub **Assignees** field on its issues. Titles `[Member 1]` through `[Member 5]` identify roles, not people. The repository owner grants the required repository/project access once usernames are supplied; assignment itself does not grant write access. Agree a reviewer for cross-component interface changes.
+The five roles are not assigned yet. 
 
 ## Daily work
 
