@@ -2,7 +2,7 @@
 
 Reusable multimodal temporal learning framework for heterogeneous temporal inputs, missing observations, asynchronous availability and prediction uncertainty.
 
-**Current status:** specifications and development backlog are available. Model implementation, tests and experiments remain to be completed; no performance result is claimed.
+**Current status:** specifications and backlog are available. Member 2 and Member 4 have model/runtime prototypes with synthetic tests; Member 3 has an evaluation prototype. Data engineering and shared application integration remain incomplete. No real-data experiment or performance result is claimed. See the [Member 2 and Member 4 implementation progress](src/mmt/README.md).
 
 ## Team workspace
 
@@ -27,7 +27,7 @@ Individual assignments are pending the team's choice. Set Assignees on issues af
 
 ## Planned implementation stack
 
-Python 3.11, PyTorch, NumPy, pandas, h5py, Pydantic, Typer, Streamlit, Plotly, pytest, Ruff and uv. Dependency compatibility and exact versions must be locked and tested in I01/I07. Installation and execution commands become operational as the corresponding issues are completed.
+Planned stack: Python 3.11, PyTorch, NumPy, pandas, h5py, Pydantic, Typer, Streamlit, Plotly, pytest, Ruff and uv. Dependency compatibility and exact versions still need to be locked and tested in I01/I07. Installation and full-pipeline commands become reproducible as the corresponding issues are completed.
 
 ## Repository policy
 
