@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
+import math
 from bisect import insort
 from dataclasses import dataclass
 from enum import Enum
-import math
 from typing import Any, Mapping
-
 
 BYTE_ESTIMATOR_VERSION = "mmt-runtime-bytes-v1"
 _RECORD_OVERHEAD_BYTES = 64
@@ -49,7 +48,9 @@ class Observation:
             raise BufferError("invalid_data", "observation timestamps must be finite")
         event_start, event_end, available_at = times
         if event_start > event_end or event_end > available_at:
-            raise BufferError("invalid_data", "timestamps must satisfy event_start <= event_end <= available_at")
+            raise BufferError(
+                "invalid_data", "timestamps must satisfy event_start <= event_end <= available_at"
+            )
         if any(valid and not math.isfinite(value) for value, valid in zip(values, valid_mask)):
             raise BufferError("invalid_data", "valid feature values must be finite")
         if any(not valid and value != 0.0 for value, valid in zip(values, valid_mask)):
@@ -58,8 +59,16 @@ class Observation:
         source_id = str(field("source_id"))
         if not sequence_id or not source_id:
             raise BufferError("invalid_data", "sequence_id and source_id must be nonempty")
-        return cls(sequence_id, source_id, int(field("observation_id")), values, valid_mask,
-                   event_start, event_end, available_at)
+        return cls(
+            sequence_id,
+            source_id,
+            int(field("observation_id")),
+            values,
+            valid_mask,
+            event_start,
+            event_end,
+            available_at,
+        )
 
     @property
     def estimated_bytes(self) -> int:
@@ -79,8 +88,12 @@ class SourceSnapshot:
 class ObservationBuffer:
     """Single-owner buffer; sequence clocks and capacity are shared across sources."""
 
-    def __init__(self, max_active_sequences: int = 1, max_observations_per_source: int = 100_000,
-                 max_buffer_bytes: int = 268_435_456) -> None:
+    def __init__(
+        self,
+        max_active_sequences: int = 1,
+        max_observations_per_source: int = 100_000,
+        max_buffer_bytes: int = 268_435_456,
+    ) -> None:
         if max_active_sequences <= 0 or max_observations_per_source <= 0 or max_buffer_bytes <= 0:
             raise ValueError("buffer limits must be positive")
         self.max_active_sequences = max_active_sequences
@@ -114,8 +127,11 @@ class ObservationBuffer:
         if previous is not None and floor < previous:
             raise BufferError("invalid_decision_order", "retention floor cannot move backward")
         self._retention_floor[sequence_id] = floor
-        expired = [key for key, record in self._records.items()
-                   if record.sequence_id == sequence_id and record.event_start < floor]
+        expired = [
+            key
+            for key, record in self._records.items()
+            if record.sequence_id == sequence_id and record.event_start < floor
+        ]
         for key in expired:
             self._remove(key)
 
@@ -126,17 +142,26 @@ class ObservationBuffer:
         if existing is not None:
             if existing == observation:
                 return InsertResult.DUPLICATE_IGNORED
-            raise BufferError("duplicate_conflict", "retained observation identity has a different payload")
+            raise BufferError(
+                "duplicate_conflict", "retained observation identity has a different payload"
+            )
 
         floor = self._retention_floor.get(observation.sequence_id)
         if floor is not None and observation.event_start < floor:
-            raise BufferError("expired_observation", "observation starts before the retained support floor")
+            raise BufferError(
+                "expired_observation", "observation starts before the retained support floor"
+            )
         last_arrival = self._last_arrival.get(observation.sequence_id)
         if last_arrival is not None and observation.available_at < last_arrival:
-            raise BufferError("invalid_arrival_order", "arrival timestamps must be nondecreasing per sequence")
+            raise BufferError(
+                "invalid_arrival_order", "arrival timestamps must be nondecreasing per sequence"
+            )
 
         active_sequences = set(self._last_arrival)
-        if observation.sequence_id not in active_sequences and len(active_sequences) >= self.max_active_sequences:
+        if (
+            observation.sequence_id not in active_sequences
+            and len(active_sequences) >= self.max_active_sequences
+        ):
             raise BufferError("buffer_overflow", "maximum active sequence count reached")
         source_key = (observation.sequence_id, observation.source_id)
         source_index = self._indexes.get(source_key, [])
@@ -149,8 +174,10 @@ class ObservationBuffer:
             raise BufferError("buffer_overflow", "maximum accounted buffer bytes reached")
 
         self._records[key] = observation
-        insort(self._indexes.setdefault(source_key, []),
-               (observation.event_end, observation.event_start, observation.observation_id))
+        insort(
+            self._indexes.setdefault(source_key, []),
+            (observation.event_end, observation.event_start, observation.observation_id),
+        )
         self._dimensions.setdefault(observation.source_id, len(observation.values))
         self._last_arrival[observation.sequence_id] = observation.available_at
         self._estimated_bytes += observation.estimated_bytes
@@ -166,12 +193,15 @@ class ObservationBuffer:
             return None
         if existing == observation:
             return InsertResult.DUPLICATE_IGNORED
-        raise BufferError("duplicate_conflict", "retained observation identity has a different payload")
+        raise BufferError(
+            "duplicate_conflict", "retained observation identity has a different payload"
+        )
 
     def snapshot(self, sequence_id: str, source_id: str) -> SourceSnapshot:
         keys = self._indexes.get((sequence_id, source_id), ())
-        records = [self._records[(sequence_id, source_id, observation_id)]
-                   for _, _, observation_id in keys]
+        records = [
+            self._records[(sequence_id, source_id, observation_id)] for _, _, observation_id in keys
+        ]
         return SourceSnapshot(
             observation_ids=tuple(record.observation_id for record in records),
             values=tuple(record.values for record in records),
@@ -182,7 +212,9 @@ class ObservationBuffer:
         )
 
     def close_sequence(self, sequence_id: str) -> None:
-        for key in [key for key, record in self._records.items() if record.sequence_id == sequence_id]:
+        for key in [
+            key for key, record in self._records.items() if record.sequence_id == sequence_id
+        ]:
             self._remove(key)
         self._last_arrival.pop(sequence_id, None)
         self._retention_floor.pop(sequence_id, None)

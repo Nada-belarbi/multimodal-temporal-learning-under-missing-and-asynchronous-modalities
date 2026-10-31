@@ -1,0 +1,34 @@
+data:
+  application: pamap2
+  manifest_path: ../data/prepared/pamap2/pamap2/protocol-grouped-2026-10-27/manifest.json
+  partitions_path: ../data/prepared/pamap2/pamap2/protocol-grouped-2026-10-27/partitions.csv
+  source_schema:
+    hand: 6
+    chest: 6
+    ankle: 6
+    heart_rate: 1
+  decision_policy: window
+  availability_mode: simulated
+  feature_order: [hand, chest, ankle, heart_rate]
+run:
+  run_id: pamap2-v0-clean-seed-11-2026-10-27
+  model_name: v0
+  seed: 11
+  regime: clean
+  partition_hashes:
+    train: 40720b561a4bd0338e98fee0911e5e4f8112a058f1375571338b7fbfe0ce833d
+    validation: 35049acd96d6d5a2f09a59a32503af84eac1a4c254d68208b2528557e100d19c
+    calibration: 9981f859ddb65bae1b21079dba05bffae004ccbc3b00189d6599a5c25150ee07
+    test: 31a763d6aa021bb4aebd6558a621c5df4848d435952b91c9e51dc82fe747007c
+  model_config:
+    hidden_size: 64
+    dropout: 0.1
+    epsilon: 1.0e-8
+  training:
+    batch_size: 32
+    max_epochs: 100
+    patience: 10
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    gradient_clip_norm: 1.0
+  output_root: ../runs

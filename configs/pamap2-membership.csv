@@ -1,0 +1,10 @@
+sequence_id,group_id,split
+subject103,subject103,train
+subject105,subject105,train
+subject107,subject107,train
+subject109,subject109,train
+subject101,subject101,validation
+subject104,subject104,validation
+subject108,subject108,calibration
+subject102,subject102,test
+subject106,subject106,test

@@ -33,7 +33,10 @@ class SourceBatch:
             raise ValueError("lengths must be int64 with shape [batch]")
         if self.present.shape != (batch_size,) or self.present.dtype != torch.bool:
             raise ValueError("present must be boolean with shape [batch]")
-        if self.padding_mask.shape != (batch_size, time_steps) or self.padding_mask.dtype != torch.bool:
+        if (
+            self.padding_mask.shape != (batch_size, time_steps)
+            or self.padding_mask.dtype != torch.bool
+        ):
             raise ValueError("padding_mask must be boolean with shape [batch, time]")
         if bool(((self.lengths < 0) | (self.lengths > time_steps)).any()):
             raise ValueError("lengths must be between zero and the padded time dimension")
@@ -80,8 +83,14 @@ class SourceEncoder(nn.Module):
         self.hidden_size = hidden_size
         self.projection = nn.Linear(2 * feature_dim + 3, hidden_size)
         self.input_dropout = nn.Dropout(dropout)
-        self.gru = nn.GRU(hidden_size, hidden_size, num_layers=1, batch_first=True,
-                           bidirectional=False, dropout=0.0)
+        self.gru = nn.GRU(
+            hidden_size,
+            hidden_size,
+            num_layers=1,
+            batch_first=True,
+            bidirectional=False,
+            dropout=0.0,
+        )
 
     def forward(self, batch: SourceBatch) -> EncoderOutput:
         batch.validate(self.feature_dim)
@@ -100,7 +109,10 @@ class SourceEncoder(nn.Module):
 
         active_lengths = batch.lengths.index_select(0, active)
         packed = pack_padded_sequence(
-            projected.index_select(0, active), active_lengths.cpu(), batch_first=True, enforce_sorted=False
+            projected.index_select(0, active),
+            active_lengths.cpu(),
+            batch_first=True,
+            enforce_sorted=False,
         )
         packed_states, hidden = self.gru(packed)
         active_states, _ = pad_packed_sequence(
@@ -112,8 +124,9 @@ class SourceEncoder(nn.Module):
 
 
 class SourceClassifier(nn.Module):
-    def __init__(self, feature_dim: int, n_classes: int, hidden_size: int = 64,
-                 dropout: float = 0.1) -> None:
+    def __init__(
+        self, feature_dim: int, n_classes: int, hidden_size: int = 64, dropout: float = 0.1
+    ) -> None:
         super().__init__()
         if n_classes <= 1:
             raise ValueError("n_classes must be greater than one")

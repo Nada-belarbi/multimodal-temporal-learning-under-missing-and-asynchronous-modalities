@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 
 import torch
 from torch import nn
@@ -11,9 +11,14 @@ from .source_encoder import ModelOutput, SourceBatch, SourceClassifier
 
 
 class V0LateFusion(nn.Module):
-    def __init__(self, source_dimensions: Mapping[str, int], n_classes: int,
-                 hidden_size: int = 64, dropout: float = 0.1,
-                 epsilon: float = 1e-8) -> None:
+    def __init__(
+        self,
+        source_dimensions: Mapping[str, int],
+        n_classes: int,
+        hidden_size: int = 64,
+        dropout: float = 0.1,
+        epsilon: float = 1e-8,
+    ) -> None:
         super().__init__()
         if not source_dimensions:
             raise ValueError("at least one source is required")
@@ -27,8 +32,7 @@ class V0LateFusion(nn.Module):
             for dimension in source_dimensions.values()
         )
 
-    def forward(self, batches: Mapping[str, SourceBatch],
-                diagnostics: bool = False) -> ModelOutput:
+    def forward(self, batches: Mapping[str, SourceBatch], diagnostics: bool = False) -> ModelOutput:
         if set(batches) != set(self.source_order):
             raise ValueError("input sources must exactly match the configured source order")
         first_batch = batches[self.source_order[0]]
@@ -59,5 +63,9 @@ class V0LateFusion(nn.Module):
         details = None
         if diagnostics:
             details = {"source_present": torch.stack(present_parts, dim=1)}
-        return ModelOutput(scores=scores, computable=computable,
-                           score_kind="log_probabilities", diagnostics=details)
+        return ModelOutput(
+            scores=scores,
+            computable=computable,
+            score_kind="log_probabilities",
+            diagnostics=details,
+        )

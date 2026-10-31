@@ -1,0 +1,8 @@
+application,source,dimension,availability_mode
+mosi,language,300,offline
+mosi,audio,74,offline
+mosi,visual,35,offline
+pamap2,hand,6,simulated
+pamap2,chest,6,simulated
+pamap2,ankle,6,simulated
+pamap2,heart_rate,1,simulated

@@ -1,0 +1,8 @@
+check,saved_value
+Final replay rows,54.0
+Model/decision records,236655.0
+Final parity failures,0.0
+Batch32 numerical rechecks,563.0
+Max batch32 score error rechecked,2.0264024658267488e-05
+Max cumulative process peak RSS (decimal GB),1.281736704
+Max shared buffer estimate (bytes),1926155.0

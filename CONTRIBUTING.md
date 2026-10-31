@@ -40,4 +40,14 @@ New matching open issues are configured to enter the Project automatically with 
 
 ## Evidence and data
 
-Implementation specifications describe work to build; no application is currently claimed as implemented. Keep raw datasets, credentials, local paths and generated run artifacts out of Git. Share only permitted fixtures and appropriate result summaries. Use explicit manifests, fixed partitions and measured evidence for model qualification.
+This repository contains an implemented research prototype, real-data preparation
+and evaluation workflows, a completed clean campaign and an explicitly partial
+robustness study. Read the root README and dated experiment log for current status;
+the work packages remain specifications for outstanding team acceptance, not proof
+that every planned task is complete. Predictive qualification is not claimed.
+
+Keep raw datasets, credentials, local paths and generated run artifacts out of
+Git. Share only permitted fixtures and appropriate result summaries. Use explicit
+manifests, fixed partitions and measured evidence for model qualification. The
+MOSI mirror's redistribution terms and the project's software license are not
+settled; do not infer permission from public availability.

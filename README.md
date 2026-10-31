@@ -2,7 +2,31 @@
 
 Reusable multimodal temporal learning framework for heterogeneous temporal inputs, missing observations, asynchronous availability and prediction uncertainty.
 
-**Current status:** specifications and backlog are available. Member 2 and Member 4 have model/runtime prototypes with synthetic tests; Member 3 has an evaluation prototype. Data engineering and shared application integration remain incomplete. No real-data experiment or performance result is claimed. See the [Member 2 and Member 4 implementation progress](src/mmt/README.md).
+**Current status:** the 18-run clean campaign (V0/V1/V2 × PAMAP2/MOSI × three seeds) completed, including test exports, reports, calibration and policy artifacts. Results and limitations are in the [experiment log](docs/EXPERIMENT_LOG.md). Predictive qualification remains `not_qualified`: acceptance bounds are unset, six calibrations fell back to T=1, and all abstention policies are disabled. Robust training, frozen-encoder ablations and the full baseline/perturbation matrix remain incomplete. See the [fusion workflow](docs/FUSION_WORKFLOW.md) for reproduction. MOSI is offline; its mirror lacks one development video and redistribution conditions remain unverified.
+
+The [partial robustness study](docs/ROBUSTNESS_STUDY.md) now includes 230 real
+evaluation exports with saved shared schedules, clean majority/source-only baselines,
+204 paired/bootstrap comparisons and 54 whole-test replay proofs with timing/memory
+measurements. Its 11 graphs and publishable result tables are in the
+[consolidated report and exports](docs/NOTEBOOK_REPORT_README.md). This is not
+exhaustive robustness or predictive qualification.
+
+## Quick Start
+
+Requires Python 3.11 and uv. From the repository root:
+
+```sh
+uv sync --locked --extra dev --extra ui
+uv run --locked python -m unittest discover -s tests
+uv run --locked mmt --help
+uv run --locked --extra ui mmt ui --port 8502
+```
+
+The saved-result [reviewer UI test report](docs/UI_TEST_REPORT.md) documents
+the tested browser flows and their limits. The English
+[consolidated experiment notebook](docs/NOTEBOOK_REPORT_README.md) links the
+reproducible report and its exported tables/figures. The final clean and partial
+robustness evidence is summarized in the [experiment log](docs/EXPERIMENT_LOG.md).
 
 ## Team workspace
 
@@ -25,10 +49,16 @@ Individual assignments are pending the team's choice. Set Assignees on issues af
 - **PAMAP2 activity recognition:** temporal sensor windows; documented simulated availability for replay.
 - **CMU MOSI sentiment classification:** completed opinion segments using audited language/audio/visual features; explicit offline/causal limitations.
 
-## Planned implementation stack
+## Tested implementation stack
 
-Planned stack: Python 3.11, PyTorch, NumPy, pandas, h5py, Pydantic, Typer, Streamlit, Plotly, pytest, Ruff and uv. Dependency compatibility and exact versions still need to be locked and tested in I01/I07. Installation and full-pipeline commands become reproducible as the corresponding issues are completed.
+Python 3.11, PyTorch, NumPy, pandas, h5py, Pydantic, Typer, Streamlit, Plotly,
+pytest, Ruff and uv are declared in `pyproject.toml` and locked in `uv.lock`.
+The test suite and lint checks are run locally; see the verification section above
+and [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow.
 
 ## Repository policy
 
-Keep datasets, secrets and generated runs outside version control. Publish only permitted fixtures and results. A public repository does not by itself select a software license; licensing remains a team decision.
+Keep datasets, secrets and generated runs outside version control. Publish only
+permitted fixtures and results. The ignored raw/prepared datasets and run outputs
+are local inputs, not part of this source delivery. A public repository does not
+by itself select a software license; no license has been selected for this project.

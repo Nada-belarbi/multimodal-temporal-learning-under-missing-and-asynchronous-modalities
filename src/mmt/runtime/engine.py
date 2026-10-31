@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
-import math
 from typing import Any
 
 from mmt.data.selection import SelectionResult, select_observations
+
 from .buffer import BufferError, InsertResult, ObservationBuffer
 
 
@@ -89,13 +90,23 @@ PredictFunction = Callable[[Any], Any]
 class InferenceEngine:
     """Callbacks adapt Member 1 batches and Member 2 models without duplicating either."""
 
-    def __init__(self, source_ids: Sequence[str], batch_builder: BatchBuilder,
-                 predict_fn: PredictFunction, n_classes: int, max_source_age: float | None = None,
-                 temperature: float = 1.0, threshold: float | None = None,
-                 max_active_sequences: int = 1, max_observations_per_source: int = 100_000,
-                 max_buffer_bytes: int = 268_435_456, session_id: str | None = None,
-                 run_id: str | None = None, scenario_id: str | None = None,
-                 artifact_hashes: Mapping[str, str] | None = None) -> None:
+    def __init__(
+        self,
+        source_ids: Sequence[str],
+        batch_builder: BatchBuilder,
+        predict_fn: PredictFunction,
+        n_classes: int,
+        max_source_age: float | None = None,
+        temperature: float = 1.0,
+        threshold: float | None = None,
+        max_active_sequences: int = 1,
+        max_observations_per_source: int = 100_000,
+        max_buffer_bytes: int = 268_435_456,
+        session_id: str | None = None,
+        run_id: str | None = None,
+        scenario_id: str | None = None,
+        artifact_hashes: Mapping[str, str] | None = None,
+    ) -> None:
         if not source_ids or len(set(source_ids)) != len(source_ids):
             raise ValueError("source_ids must be nonempty and unique")
         if n_classes <= 1:
@@ -115,7 +126,9 @@ class InferenceEngine:
         self.run_id = run_id
         self.scenario_id = scenario_id
         self.artifact_hashes = dict(artifact_hashes or {})
-        self.buffer = ObservationBuffer(max_active_sequences, max_observations_per_source, max_buffer_bytes)
+        self.buffer = ObservationBuffer(
+            max_active_sequences, max_observations_per_source, max_buffer_bytes
+        )
         self._last_decision: dict[str, tuple[float, float]] = {}
         self._generation: dict[str, int] = {}
 
@@ -127,7 +140,9 @@ class InferenceEngine:
         if duplicate is not None:
             return duplicate
         if sealed is not None and available_at <= sealed[0]:
-            raise BufferError("invalid_arrival_order", "a new arrival cannot alter a sealed decision time")
+            raise BufferError(
+                "invalid_arrival_order", "a new arrival cannot alter a sealed decision time"
+            )
         return self.buffer.insert(observation)
 
     def predict(self, decision: Any) -> PredictionRecord:
@@ -135,21 +150,27 @@ class InferenceEngine:
         decision_time = _finite_time(_field(decision, "decision_time"), "decision_time")
         support_start = _finite_time(_field(decision, "support_start"), "support_start")
         support_end = _finite_time(_field(decision, "support_end"), "support_end")
-        decision_id = str(_field(decision, "decision_id"))
         if support_start > support_end or support_end > decision_time:
-            raise BufferError("invalid_data", "decision support must satisfy start <= end <= decision_time")
+            raise BufferError(
+                "invalid_data", "decision support must satisfy start <= end <= decision_time"
+            )
         previous = self._last_decision.get(sequence_id)
         if previous is not None and decision_time <= previous[0]:
-            raise BufferError("invalid_decision_order", "stateful decision times must increase strictly")
+            raise BufferError(
+                "invalid_decision_order", "stateful decision times must increase strictly"
+            )
         if previous is not None and support_start < previous[1]:
-            raise BufferError("invalid_decision_order", "stateful support start cannot move backward")
+            raise BufferError(
+                "invalid_decision_order", "stateful support start cannot move backward"
+            )
         self.buffer.advance_retention_floor(sequence_id, support_start)
         selections = self._select(sequence_id, decision)
         self._last_decision[sequence_id] = (decision_time, support_start)
         return self._decorate(sequence_id, self._predict_selected(decision, selections))
 
-    def predict_batch(self, decisions: Sequence[Any],
-                      sources: Mapping[tuple[str, str], Any]) -> list[PredictionRecord]:
+    def predict_batch(
+        self, decisions: Sequence[Any], sources: Mapping[tuple[str, str], Any]
+    ) -> list[PredictionRecord]:
         """Predict independently from complete source sequences; this method is stateless."""
         predictions = []
         for decision in decisions:
@@ -177,12 +198,15 @@ class InferenceEngine:
             for source_id in self.source_ids
         }
 
-    def _select_from_sources(self, decision: Any,
-                             sources: Mapping[tuple[str, str], Any]) -> dict[str, SelectionResult]:
+    def _select_from_sources(
+        self, decision: Any, sources: Mapping[tuple[str, str], Any]
+    ) -> dict[str, SelectionResult]:
         sequence_id = str(_field(decision, "sequence_id"))
         return {
             source_id: select_observations(
-                sources.get((sequence_id, source_id), _empty_source()), decision, self.max_source_age
+                sources.get((sequence_id, source_id), _empty_source()),
+                decision,
+                self.max_source_age,
             )
             for source_id in self.source_ids
         }
@@ -197,8 +221,9 @@ class InferenceEngine:
             artifact_hashes=self.artifact_hashes,
         )
 
-    def _predict_selected(self, decision: Any,
-                          selections: Mapping[str, SelectionResult]) -> PredictionRecord:
+    def _predict_selected(
+        self, decision: Any, selections: Mapping[str, SelectionResult]
+    ) -> PredictionRecord:
         sequence_id = str(_field(decision, "sequence_id"))
         decision_id = str(_field(decision, "decision_id"))
         decision_time = float(_field(decision, "decision_time"))
@@ -213,12 +238,28 @@ class InferenceEngine:
             }
             for source_id, result in selections.items()
         }
-        selected_ids = {source_id: result.observation_ids for source_id, result in selections.items()}
+        selected_ids = {
+            source_id: result.observation_ids for source_id, result in selections.items()
+        }
         if not any(result.selected_count for result in selections.values()):
             return PredictionRecord(
-                sequence_id, decision_id, decision_time, support_start, support_end,
-                False, None, None, None, None, None, False, "unavailable_no_data",
-                "all_sources_unusable", evidence, selected_ids, False,
+                sequence_id,
+                decision_id,
+                decision_time,
+                support_start,
+                support_end,
+                False,
+                None,
+                None,
+                None,
+                None,
+                None,
+                False,
+                "unavailable_no_data",
+                "all_sources_unusable",
+                evidence,
+                selected_ids,
+                False,
             )
 
         try:
@@ -230,19 +271,49 @@ class InferenceEngine:
         computable = _as_bool(_get_output(output, "computable"))
         if not computable:
             return PredictionRecord(
-                sequence_id, decision_id, decision_time, support_start, support_end,
-                False, None, None, None, None, None, False, "unavailable_no_data",
-                "model_input_unusable", evidence, selected_ids, False,
+                sequence_id,
+                decision_id,
+                decision_time,
+                support_start,
+                support_end,
+                False,
+                None,
+                None,
+                None,
+                None,
+                None,
+                False,
+                "unavailable_no_data",
+                "model_input_unusable",
+                evidence,
+                selected_ids,
+                False,
             )
         score_kind = str(_get_output(output, "score_kind"))
         if score_kind == "label_only":
             predicted_class = int(_get_output(output, "predicted_class"))
             if not 0 <= predicted_class < self.n_classes:
-                raise RuntimeError("model_execution_failed: predicted class is outside the class map")
+                raise RuntimeError(
+                    "model_execution_failed: predicted class is outside the class map"
+                )
             return PredictionRecord(
-                sequence_id, decision_id, decision_time, support_start, support_end,
-                True, score_kind, None, None, predicted_class, None, True, "accepted",
-                None, evidence, selected_ids, False,
+                sequence_id,
+                decision_id,
+                decision_time,
+                support_start,
+                support_end,
+                True,
+                score_kind,
+                None,
+                None,
+                predicted_class,
+                None,
+                True,
+                "accepted",
+                None,
+                evidence,
+                selected_ids,
+                False,
             )
         if score_kind not in ("logits", "log_probabilities"):
             raise RuntimeError(f"model_execution_failed: unsupported score_kind {score_kind!r}")
@@ -255,9 +326,23 @@ class InferenceEngine:
         accepted = self.threshold is None or confidence >= self.threshold
         status = "accepted" if accepted else "abstained_low_confidence"
         return PredictionRecord(
-            sequence_id, decision_id, decision_time, support_start, support_end,
-            True, score_kind, tuple(scores), tuple(probabilities), predicted_class,
-            confidence, accepted, status, None, evidence, selected_ids, True,
+            sequence_id,
+            decision_id,
+            decision_time,
+            support_start,
+            support_end,
+            True,
+            score_kind,
+            tuple(scores),
+            tuple(probabilities),
+            predicted_class,
+            confidence,
+            accepted,
+            status,
+            None,
+            evidence,
+            selected_ids,
+            True,
         )
 
 
@@ -267,6 +352,10 @@ def _get_output(output: Any, name: str) -> Any:
 
 def _empty_source() -> Mapping[str, tuple[Any, ...]]:
     return {
-        "observation_ids": (), "values": (), "valid_mask": (),
-        "event_start": (), "event_end": (), "available_at": (),
+        "observation_ids": (),
+        "values": (),
+        "valid_mask": (),
+        "event_start": (),
+        "event_end": (),
+        "available_at": (),
     }

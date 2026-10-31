@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from typing import Mapping
 
 from .selection import SelectionResult
@@ -29,8 +29,13 @@ def build_common_grid(
     hold_limit_seconds: float = 0.5,
 ) -> GridSequence:
     """Hold the latest valid event-time value; never interpolate toward future samples."""
-    values_to_validate = (support_start, support_end, decision_time,
-                          grid_step_seconds, hold_limit_seconds)
+    values_to_validate = (
+        support_start,
+        support_end,
+        decision_time,
+        grid_step_seconds,
+        hold_limit_seconds,
+    )
     if not all(math.isfinite(float(value)) for value in values_to_validate):
         raise ValueError("grid times and settings must be finite")
     if support_start >= support_end or support_end > decision_time:
@@ -39,9 +44,11 @@ def build_common_grid(
         raise ValueError("grid step must be positive and hold limit nonnegative")
     if set(selections) != set(source_dimensions):
         raise ValueError("selection keys must match source dimensions")
-    feature_order = tuple((source_id, feature_index)
-                         for source_id, dimension in source_dimensions.items()
-                         for feature_index in range(dimension))
+    feature_order = tuple(
+        (source_id, feature_index)
+        for source_id, dimension in source_dimensions.items()
+        for feature_index in range(dimension)
+    )
     if any(dimension <= 0 for dimension in source_dimensions.values()):
         raise ValueError("source dimensions must be positive")
 
@@ -63,13 +70,20 @@ def build_common_grid(
             if any(len(row) != dimension for row in selected.values):
                 raise ValueError(f"selected feature dimension differs for source {source_id!r}")
             for feature_index in range(dimension):
-                candidates = [index for index, end in enumerate(selected.event_end)
-                              if end <= grid_time and selected.valid_mask[index][feature_index]]
+                candidates = [
+                    index
+                    for index, end in enumerate(selected.event_end)
+                    if end <= grid_time and selected.valid_mask[index][feature_index]
+                ]
                 if candidates:
-                    chosen = max(candidates, key=lambda index: (
-                        selected.event_end[index], selected.event_start[index],
-                        selected.observation_ids[index],
-                    ))
+                    chosen = max(
+                        candidates,
+                        key=lambda index: (
+                            selected.event_end[index],
+                            selected.event_start[index],
+                            selected.observation_ids[index],
+                        ),
+                    )
                     age = grid_time - selected.event_end[chosen]
                     if age <= hold_limit_seconds:
                         row_values.append(selected.values[chosen][feature_index])
@@ -83,5 +97,11 @@ def build_common_grid(
         grid_masks.append(tuple(row_masks))
         grid_ages.append(tuple(row_ages))
 
-    return GridSequence(tuple(grid), tuple(grid_values), tuple(grid_masks), tuple(grid_ages),
-                        float(decision_time), feature_order)
+    return GridSequence(
+        tuple(grid),
+        tuple(grid_values),
+        tuple(grid_masks),
+        tuple(grid_ages),
+        float(decision_time),
+        feature_order,
+    )

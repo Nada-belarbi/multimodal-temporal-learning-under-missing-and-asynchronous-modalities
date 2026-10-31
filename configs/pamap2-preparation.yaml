@@ -1,0 +1,65 @@
+application: pamap2
+raw_root: ../data/raw/pamap2/uci_archive/extracted/PAMAP2_Dataset/Protocol
+membership_path: pamap2-membership.csv
+prepared_root: ../data/prepared/pamap2
+audit_root: ../data/raw/pamap2/provenance/2026-10-27
+preparation_id: protocol-grouped-2026-10-27
+window_seconds: 5.0
+stride_seconds: 1.0
+max_label_age_seconds: 0.02
+chunksize: 100000
+recordings:
+  - sequence_id: subject101
+    relative_path: subject101.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited
+  - sequence_id: subject102
+    relative_path: subject102.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited
+  - sequence_id: subject103
+    relative_path: subject103.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited
+  - sequence_id: subject104
+    relative_path: subject104.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited
+  - sequence_id: subject105
+    relative_path: subject105.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited
+  - sequence_id: subject106
+    relative_path: subject106.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited
+  - sequence_id: subject107
+    relative_path: subject107.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited
+  - sequence_id: subject108
+    relative_path: subject108.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited
+  - sequence_id: subject109
+    relative_path: subject109.dat
+    provider_reference: UCI PAMAP2 DOI 10.24432/C5NW2H
+    retrieved_at: '2026-10-26T00:00:00Z'
+    declared_version: UCI PAMAP2 Protocol
+    reader_status: sha256-verified-54-column-schema-audited

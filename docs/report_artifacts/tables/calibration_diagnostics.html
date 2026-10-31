@@ -1,0 +1,462 @@
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>application</th>
+      <th>model</th>
+      <th>seed</th>
+      <th>run_id</th>
+      <th>status</th>
+      <th>saved_temperature</th>
+      <th>score_kind</th>
+      <th>optimizer</th>
+      <th>at_bound</th>
+      <th>calibration_accuracy</th>
+      <th>class_support</th>
+      <th>closure_evaluations</th>
+      <th>converged</th>
+      <th>final_grad</th>
+      <th>final_nll</th>
+      <th>initial_grad</th>
+      <th>initial_nll</th>
+      <th>iterations</th>
+      <th>missing_classes</th>
+      <th>n</th>
+      <th>termination</th>
+      <th>warning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mosi</td>
+      <td>v0</td>
+      <td>11</td>
+      <td>clean-long-20261027-run1-mosi-v0-seed-11</td>
+      <td>ok</td>
+      <td>0.495904</td>
+      <td>log_probabilities</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.666667</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>5</td>
+      <td>True</td>
+      <td>-9.855604e-09</td>
+      <td>0.596810</td>
+      <td>0.045936</td>
+      <td>0.618799</td>
+      <td>2</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>mosi</td>
+      <td>v0</td>
+      <td>22</td>
+      <td>clean-long-20261027-run1-mosi-v0-seed-22</td>
+      <td>ok</td>
+      <td>0.511404</td>
+      <td>log_probabilities</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.711111</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>5</td>
+      <td>True</td>
+      <td>-2.907660e-09</td>
+      <td>0.594408</td>
+      <td>0.046905</td>
+      <td>0.615566</td>
+      <td>2</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>mosi</td>
+      <td>v0</td>
+      <td>33</td>
+      <td>clean-long-20261027-run1-mosi-v0-seed-33</td>
+      <td>ok</td>
+      <td>0.686934</td>
+      <td>log_probabilities</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.666667</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>5</td>
+      <td>True</td>
+      <td>1.880978e-07</td>
+      <td>0.613336</td>
+      <td>0.032041</td>
+      <td>0.620455</td>
+      <td>4</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>mosi</td>
+      <td>v1</td>
+      <td>11</td>
+      <td>clean-long-20261027-run1-mosi-v1-seed-11</td>
+      <td>fit_failed</td>
+      <td>1.000000</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.666667</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>12</td>
+      <td>False</td>
+      <td>4.080649e-06</td>
+      <td>0.624540</td>
+      <td>-2.115146</td>
+      <td>2.216670</td>
+      <td>5</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>mosi</td>
+      <td>v1</td>
+      <td>22</td>
+      <td>clean-long-20261027-run1-mosi-v1-seed-22</td>
+      <td>ok</td>
+      <td>1.419088</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.655556</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>7</td>
+      <td>True</td>
+      <td>2.136247e-07</td>
+      <td>0.610482</td>
+      <td>-0.071163</td>
+      <td>0.621511</td>
+      <td>6</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>mosi</td>
+      <td>v1</td>
+      <td>33</td>
+      <td>clean-long-20261027-run1-mosi-v1-seed-33</td>
+      <td>ok</td>
+      <td>2.214030</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.711111</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>9</td>
+      <td>True</td>
+      <td>-1.244917e-08</td>
+      <td>0.549583</td>
+      <td>-0.320969</td>
+      <td>0.656137</td>
+      <td>5</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>mosi</td>
+      <td>v2</td>
+      <td>11</td>
+      <td>clean-long-20261027-run1-mosi-v2-seed-11</td>
+      <td>fit_failed</td>
+      <td>1.000000</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.688889</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>8</td>
+      <td>False</td>
+      <td>-1.728926e-06</td>
+      <td>0.565553</td>
+      <td>-0.122300</td>
+      <td>0.588766</td>
+      <td>7</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>mosi</td>
+      <td>v2</td>
+      <td>22</td>
+      <td>clean-long-20261027-run1-mosi-v2-seed-22</td>
+      <td>fit_failed</td>
+      <td>1.000000</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.677778</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>12</td>
+      <td>False</td>
+      <td>2.916894e-06</td>
+      <td>0.587767</td>
+      <td>-0.566300</td>
+      <td>0.822847</td>
+      <td>5</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>mosi</td>
+      <td>v2</td>
+      <td>33</td>
+      <td>clean-long-20261027-run1-mosi-v2-seed-33</td>
+      <td>ok</td>
+      <td>3.780332</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.711111</td>
+      <td>{'0': 35, '1': 55}</td>
+      <td>13</td>
+      <td>True</td>
+      <td>-2.736940e-07</td>
+      <td>0.571372</td>
+      <td>-0.807781</td>
+      <td>0.980319</td>
+      <td>6</td>
+      <td>[]</td>
+      <td>90</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v0</td>
+      <td>11</td>
+      <td>clean-long-20261027-run1-pamap2-v0-seed-11</td>
+      <td>ok</td>
+      <td>0.378405</td>
+      <td>log_probabilities</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.721099</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>7</td>
+      <td>True</td>
+      <td>-5.461661e-08</td>
+      <td>0.923170</td>
+      <td>0.572895</td>
+      <td>1.256179</td>
+      <td>6</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v0</td>
+      <td>22</td>
+      <td>clean-long-20261027-run1-pamap2-v0-seed-22</td>
+      <td>ok</td>
+      <td>0.376762</td>
+      <td>log_probabilities</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.793590</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>6</td>
+      <td>True</td>
+      <td>3.400219e-08</td>
+      <td>0.793168</td>
+      <td>0.579976</td>
+      <td>1.115699</td>
+      <td>5</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v0</td>
+      <td>33</td>
+      <td>clean-long-20261027-run1-pamap2-v0-seed-33</td>
+      <td>ok</td>
+      <td>0.412801</td>
+      <td>log_probabilities</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.832125</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>6</td>
+      <td>True</td>
+      <td>4.031922e-08</td>
+      <td>0.716797</td>
+      <td>0.596964</td>
+      <td>1.005411</td>
+      <td>5</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v1</td>
+      <td>11</td>
+      <td>clean-long-20261027-run1-pamap2-v1-seed-11</td>
+      <td>fit_failed</td>
+      <td>1.000000</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.652041</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>7</td>
+      <td>False</td>
+      <td>2.866705e-05</td>
+      <td>1.016441</td>
+      <td>-0.987314</td>
+      <td>1.371880</td>
+      <td>6</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v1</td>
+      <td>22</td>
+      <td>clean-long-20261027-run1-pamap2-v1-seed-22</td>
+      <td>ok</td>
+      <td>1.637452</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.581839</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>8</td>
+      <td>True</td>
+      <td>-1.726739e-07</td>
+      <td>1.124172</td>
+      <td>-0.635366</td>
+      <td>1.274017</td>
+      <td>7</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v1</td>
+      <td>33</td>
+      <td>clean-long-20261027-run1-pamap2-v1-seed-33</td>
+      <td>fit_failed</td>
+      <td>1.000000</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.598626</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>8</td>
+      <td>False</td>
+      <td>-2.961946e-06</td>
+      <td>1.125220</td>
+      <td>-0.777093</td>
+      <td>1.326582</td>
+      <td>7</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v2</td>
+      <td>11</td>
+      <td>clean-long-20261027-run1-pamap2-v2-seed-11</td>
+      <td>ok</td>
+      <td>1.517733</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.566196</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>6</td>
+      <td>True</td>
+      <td>-1.414969e-07</td>
+      <td>1.110156</td>
+      <td>-0.541581</td>
+      <td>1.219910</td>
+      <td>4</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v2</td>
+      <td>22</td>
+      <td>clean-long-20261027-run1-pamap2-v2-seed-22</td>
+      <td>fit_failed</td>
+      <td>1.000000</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.449065</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>13</td>
+      <td>False</td>
+      <td>-4.677015e-06</td>
+      <td>1.767644</td>
+      <td>-2.881718</td>
+      <td>3.252423</td>
+      <td>4</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>pamap2</td>
+      <td>v2</td>
+      <td>33</td>
+      <td>clean-long-20261027-run1-pamap2-v2-seed-33</td>
+      <td>ok</td>
+      <td>1.468262</td>
+      <td>logits</td>
+      <td>torch LBFGS</td>
+      <td>False</td>
+      <td>0.592522</td>
+      <td>{'0': 242, '1': 229, '10': 330, '11': 88, '2': 251, '3': 316, '4': 166, '5': 254, '6': 289, '7': 117, '8': 96, '9': 243}</td>
+      <td>6</td>
+      <td>True</td>
+      <td>-7.625671e-07</td>
+      <td>1.123653</td>
+      <td>-0.542815</td>
+      <td>1.225918</td>
+      <td>4</td>
+      <td>[]</td>
+      <td>2621</td>
+      <td>torch LBFGS step completed</td>
+      <td>None</td>
+    </tr>
+  </tbody>
+</table>

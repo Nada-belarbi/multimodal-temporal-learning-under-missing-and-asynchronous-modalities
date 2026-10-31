@@ -9,6 +9,8 @@ import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
+from mmt.data.grid import GridSequence
+
 from .source_encoder import ModelOutput
 
 
@@ -45,8 +47,9 @@ class MajorityReference:
     def predict(self, input_available: bool) -> MajorityOutput:
         if self.selected_class is None:
             raise RuntimeError("majority reference must be fitted before prediction")
-        return MajorityOutput(self.selected_class if input_available else None,
-                              bool(input_available))
+        return MajorityOutput(
+            self.selected_class if input_available else None, bool(input_available)
+        )
 
 
 @dataclass(frozen=True)
@@ -60,9 +63,39 @@ class GridBatch:
     padding_mask: torch.Tensor
 
 
+def collate_grid_sequences(sequences: list[GridSequence]) -> GridBatch:
+    if not sequences:
+        raise ValueError("cannot collate an empty grid batch")
+    feature_order = sequences[0].feature_order
+    feature_count = len(feature_order)
+    if feature_count == 0 or any(item.feature_order != feature_order for item in sequences):
+        raise ValueError("grid feature order must be identical and nonempty")
+    if any(len(item.grid_times) == 0 for item in sequences):
+        raise ValueError("each grid sequence must contain a decision endpoint")
+    lengths = torch.tensor([len(item.grid_times) for item in sequences], dtype=torch.long)
+    batch_size = len(sequences)
+    max_steps = int(lengths.max().item())
+    values = torch.zeros((batch_size, max_steps, feature_count), dtype=torch.float32)
+    masks = torch.zeros((batch_size, max_steps, feature_count), dtype=torch.bool)
+    ages = torch.zeros((batch_size, max_steps, feature_count), dtype=torch.float32)
+    grid_times = torch.zeros((batch_size, max_steps), dtype=torch.float64)
+    decision_times = torch.tensor([item.decision_time for item in sequences], dtype=torch.float64)
+    for index, item in enumerate(sequences):
+        row_count = len(item.grid_times)
+        if any(len(rows) != row_count for rows in (item.values, item.feature_mask, item.ages)):
+            raise ValueError("grid rows, masks, ages and timestamps must have equal lengths")
+        values[index, :row_count] = torch.tensor(item.values, dtype=torch.float32)
+        masks[index, :row_count] = torch.tensor(item.feature_mask, dtype=torch.bool)
+        ages[index, :row_count] = torch.tensor(item.ages, dtype=torch.float32)
+        grid_times[index, :row_count] = torch.tensor(item.grid_times, dtype=torch.float64)
+    padding_mask = torch.arange(max_steps).unsqueeze(0) >= lengths.unsqueeze(1)
+    return GridBatch(values, masks, ages, grid_times, decision_times, lengths, padding_mask)
+
+
 class BGridClassifier(nn.Module):
-    def __init__(self, feature_count: int, n_classes: int, hidden_size: int = 64,
-                 dropout: float = 0.1) -> None:
+    def __init__(
+        self, feature_count: int, n_classes: int, hidden_size: int = 64, dropout: float = 0.1
+    ) -> None:
         super().__init__()
         if feature_count <= 0 or n_classes <= 1:
             raise ValueError("feature_count and n_classes must be valid")
@@ -71,8 +104,14 @@ class BGridClassifier(nn.Module):
         self.feature_count = feature_count
         self.projection = nn.Linear(3 * feature_count + 1, hidden_size)
         self.dropout = nn.Dropout(dropout)
-        self.gru = nn.GRU(hidden_size, hidden_size, num_layers=1, batch_first=True,
-                           bidirectional=False, dropout=0.0)
+        self.gru = nn.GRU(
+            hidden_size,
+            hidden_size,
+            num_layers=1,
+            batch_first=True,
+            bidirectional=False,
+            dropout=0.0,
+        )
         self.classifier = nn.Linear(hidden_size, n_classes)
         self.n_classes = n_classes
 
@@ -90,7 +129,9 @@ class BGridClassifier(nn.Module):
             raise ValueError("padding_mask must have shape [batch, time]")
         if bool(((batch.lengths <= 0) | (batch.lengths > time_steps)).any()):
             raise ValueError("every common grid must contain at least one point")
-        expected_padding = torch.arange(time_steps, device=batch.lengths.device).unsqueeze(0) >= batch.lengths.unsqueeze(1)
+        expected_padding = torch.arange(time_steps, device=batch.lengths.device).unsqueeze(
+            0
+        ) >= batch.lengths.unsqueeze(1)
         if not torch.equal(batch.padding_mask, expected_padding):
             raise ValueError("padding_mask must agree with lengths")
         if bool((batch.ages < 0).any()):
@@ -102,12 +143,16 @@ class BGridClassifier(nn.Module):
         clock_age = batch.decision_times.unsqueeze(1) - batch.grid_times
         if bool((clock_age.masked_select(~batch.padding_mask) < 0).any()):
             raise ValueError("grid times cannot be after their decision time")
-        clock_feature = torch.log1p(clock_age.clamp_min(0)).unsqueeze(-1)
-        encoded_input = torch.cat((
-            batch.values.masked_fill(~batch.feature_mask, 0.0),
-            batch.feature_mask.to(batch.values.dtype),
-            torch.log1p(batch.ages), clock_feature,
-        ), dim=-1)
+        clock_feature = torch.log1p(clock_age.clamp_min(0)).to(batch.values.dtype).unsqueeze(-1)
+        encoded_input = torch.cat(
+            (
+                batch.values.masked_fill(~batch.feature_mask, 0.0),
+                batch.feature_mask.to(batch.values.dtype),
+                torch.log1p(batch.ages),
+                clock_feature,
+            ),
+            dim=-1,
+        )
         projected = self.dropout(torch.relu(self.projection(encoded_input)))
         computable = batch.feature_mask.any(dim=(1, 2))
         scores = projected.new_zeros((batch_size, self.n_classes))
@@ -115,7 +160,9 @@ class BGridClassifier(nn.Module):
         if active.numel():
             active_lengths = batch.lengths.index_select(0, active)
             packed = pack_padded_sequence(
-                projected.index_select(0, active), active_lengths.cpu(), batch_first=True,
+                projected.index_select(0, active),
+                active_lengths.cpu(),
+                batch_first=True,
                 enforce_sorted=False,
             )
             _, hidden = self.gru(packed)

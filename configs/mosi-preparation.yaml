@@ -1,0 +1,12 @@
+raw_path: ../data/raw/mosi/multibench/mosi_unalign.hdf5
+raw_sha256: 4915dbd1ad174ebd4967843188d8a678c4c3c0be4e7dce99edb6f50b89c3c29b
+resources_root: ../data/raw/mosi/resources
+sdk_revision: 4f2eadcd7e7b9e20e83b868cdad385b41830285c
+glove_model: glove-wiki-gigaword-300
+glove_md5: 29e9329ac2241937d55b852e8284e89b
+glove_sha256: 0a7aebbe49097dc6e5ffff7a25e9aa20181a6e862050ca68bd2f36e056739e00
+folds_sha256: 027ca94558d1f2ac0b30b7a773f2b65439dc437fa42634c41e1fcf635d56127d
+calibration_videos: 5
+prepared_root: ../data/prepared
+evidence_root: ../data/raw/mosi/provenance/2026-10-27
+preparation_id: native-offline-glove6b300-2026-10-27-v2

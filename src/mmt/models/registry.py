@@ -12,7 +12,6 @@ from .fusion import V1GatedFusion, V2AttentionFusion
 from .source_encoder import SourceClassifier
 from .v0_late_fusion import V0LateFusion
 
-
 MODEL_NAMES = ("majority", "unimodal", "b_grid", "v0", "v1", "v2")
 
 
@@ -23,13 +22,18 @@ def _class_count(class_map: Mapping[Any, int]) -> int:
     return len(indices)
 
 
-def build_model(model_name: str, source_dimensions: Mapping[str, int],
-                class_map: Mapping[Any, int], config: Mapping[str, Any] | None = None) -> nn.Module:
+def build_model(
+    model_name: str,
+    source_dimensions: Mapping[str, int],
+    class_map: Mapping[Any, int],
+    config: Mapping[str, Any] | None = None,
+) -> nn.Module:
     """Build a torch model from the audited source dimensions and fixed class order."""
     if model_name not in MODEL_NAMES or model_name == "majority":
         raise ValueError(f"model name must be one of {MODEL_NAMES[1:]}")
-    if not source_dimensions or any(not source_id or dimension <= 0
-                                   for source_id, dimension in source_dimensions.items()):
+    if not source_dimensions or any(
+        not source_id or dimension <= 0 for source_id, dimension in source_dimensions.items()
+    ):
         raise ValueError("source dimensions must contain named sources with positive dimensions")
     options = dict(config or {})
     n_classes = _class_count(class_map)
@@ -59,8 +63,9 @@ def build_model(model_name: str, source_dimensions: Mapping[str, int],
         feedforward_size = int(options.pop("feedforward_size", 128))
         if options:
             raise ValueError(f"unknown V2 options: {sorted(options)}")
-        return V2AttentionFusion(source_dimensions, n_classes, hidden_size, dropout,
-                                 n_heads, feedforward_size)
+        return V2AttentionFusion(
+            source_dimensions, n_classes, hidden_size, dropout, n_heads, feedforward_size
+        )
     if model_name == "b_grid":
         feature_count = sum(source_dimensions.values())
         if options:

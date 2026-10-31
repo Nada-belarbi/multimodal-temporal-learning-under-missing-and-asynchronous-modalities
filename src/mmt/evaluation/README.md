@@ -3,8 +3,8 @@
 Python package that checks an experiment design, injects reproducible faults, scores predictions honestly,
 calibrates probabilities and decides when to abstain. It never trains a model.
 
-**Status: working prototype, tested on synthetic data with a stand-in model only. No real-data result exists and
-no performance number is claimed.** Parts were drafted with AI assistance; the author is reviewing them.
+**Status: evaluation prototype, covered by synthetic tests with stand-in predictors only. No real-data result exists and
+no performance number is claimed.** Module coverage does not imply a complete real-data evaluation workflow.
 
 ## What is done
 | Module | Does |
@@ -19,41 +19,60 @@ no performance number is claimed.** Parts were drafted with AI assistance; the a
 | `report.py` | Frozen manifest, acceptance rules, two separate statuses, static HTML report. |
 | `io_utils.py` | Hashes, JSON without NaN, never-overwrite result folders. |
 
-Checked with 32 automated tests (kept outside this folder) that passed when run, including the specification's
-hand-computed example: for `y=[0,1]`, `p=[[0.8,0.2],[0.3,0.7]]` the NLL is 0.2899, Brier 0.13, ECE 0.25.
+The repository test suite includes analytical evaluation, protocol, calibration, policy, schedule, runner,
+bootstrap, acceptance and report tests in `tests/test_evaluation.py`, `tests/test_evaluation_runner.py` and
+`tests/test_reporting_service.py`. The hand-computed example is covered: for `y=[0,1]`,
+`p=[[0.8,0.2],[0.3,0.7]]`, NLL is 0.2899, Brier 0.13 and ECE 0.25.
 
 ## What is not done yet
 - Nothing has run on real PAMAP2 or MOSI data, or with a real trained model.
 - Real participant lists and group counts: not available, so no real split exists. None are invented here.
 - Acceptance bounds (for example a minimum F1) are not set. They must be measured on validation, then frozen.
-- The PyTorch version of the temperature fit was never run and is not included; SciPy is used instead.
-- Parquet output was never run here; predictions are written as CSV when `pyarrow` is missing.
+- Temperature fitting uses PyTorch LBFGS on CPU float64 and is tested on synthetic scores; no real calibration split exists yet.
+- Parquet output is optional (`uv sync --extra parquet`); CSV is the documented fallback when PyArrow is absent.
 - Results for clean versus robust training, three seeds and the full 81-scenario PAMAP2 catalogue do not exist yet.
 
 ## How to run
-Python 3.11 or newer (developed on 3.12). Install, then run from the repository root with `src` on the path:
+Python 3.11 or newer. Install from the repository root with the locked project dependencies:
 ```
-pip install numpy pandas scikit-learn scipy matplotlib jinja2
+uv sync --locked --extra parquet
 ```
 Scores-only example (made-up numbers, runs in a second):
 ```python
-import sys; sys.path.insert(0, 'src')
+import sys
+
+sys.path.insert(0, "src")
 import numpy as np
 from mmt.evaluation.calibration import fit_temperature
 from mmt.evaluation.abstention import select_policy
 from mmt.evaluation.metrics import probability_metrics, log_probs
 
-rng = np.random.default_rng(0); n, C = 600, 3
-y = rng.integers(0, C, n); S = rng.normal(size=(n, C)); S[np.arange(n), y] += 2.0; S *= 6.0   # over-confident
-cal = fit_temperature(S[:300], y[:300], C, dict(model='demo'), 'logits')                    # calibration rows
-print('status', cal['status'], 'T', round(cal['T'], 2))
-before, _ = probability_metrics(S[300:], y[300:], 1.0); after, _ = probability_metrics(S[300:], y[300:], cal['T'])
-print('NLL', round(before['nll'], 3), '->', round(after['nll'], 3), '| ECE', round(before['ece'], 3), '->', round(after['ece'], 3))
-P = np.exp(log_probs(S[300:], cal['T'])); ok = P.argmax(1) == y[300:]
+rng = np.random.default_rng(0)
+n, C = 600, 3
+y = rng.integers(0, C, n)
+S = rng.normal(size=(n, C))
+S[np.arange(n), y] += 2.0
+S *= 6.0  # over-confident
+cal = fit_temperature(S[:300], y[:300], C, dict(model="demo"), "logits")  # calibration rows
+print("status", cal["status"], "T", round(cal["T"], 2))
+before, _ = probability_metrics(S[300:], y[300:], 1.0)
+after, _ = probability_metrics(S[300:], y[300:], cal["T"])
+print(
+    "NLL",
+    round(before["nll"], 3),
+    "->",
+    round(after["nll"], 3),
+    "| ECE",
+    round(before["ece"], 3),
+    "->",
+    round(after["ece"], 3),
+)
+P = np.exp(log_probs(S[300:], cal["T"]))
+ok = P.argmax(1) == y[300:]
 pol, curve = select_policy(P.max(1), ok, len(ok), risk_limit=0.05)
-print('policy', pol['status'], 'tau', None if pol['tau'] is None else round(pol['tau'], 3))
+print("policy", pol["status"], "tau", None if pol["tau"] is None else round(pol["tau"], 3))
 ```
-The full pipeline calls, in order: `validate_protocol` -> `scenario_catalogue` / `build_schedule` -> `evaluate`
+The analytical example uses synthetic numbers; it is not a dataset experiment. The full pipeline calls, in order: `validate_protocol` -> `scenario_catalogue` / `build_schedule` -> `evaluate`
 (needs a `predict_fn(row, sources) -> dict(computable, scores, predicted_class, presence)`) -> `fit_temperature` ->
 `select_policy` -> `paired_bootstrap` -> `freeze_manifest` / `evaluate_acceptance` / `render_report`.
 

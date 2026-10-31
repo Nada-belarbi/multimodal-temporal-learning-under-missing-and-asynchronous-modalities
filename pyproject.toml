@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mmt-temporal-learning"
+version = "0.1.0"
+description = "Multimodal temporal learning with missing and asynchronous modalities"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "h5py>=3.10",
+    "jinja2>=3.1",
+    "matplotlib>=3.8",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "pydantic>=2.6",
+    "PyYAML>=6.0",
+    "scikit-learn>=1.4",
+    "torch>=2.2",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+ui = ["plotly>=5.19", "streamlit>=1.32"]
+parquet = ["pyarrow>=15"]
+dev = ["pytest>=8", "ruff>=0.3"]
+
+[project.scripts]
+mmt = "mmt.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "unit: fast isolated behavior tests",
+    "integration: tests that connect multiple packages",
+    "fixture: tests using redistributable synthetic fixtures",
+    "dataset: tests that require external datasets",
+    "slow: resource-intensive tests",
+    "ui: reviewer interface tests",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+ignore = ["E701", "E702"]

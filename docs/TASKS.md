@@ -4,6 +4,13 @@
 
 41 implementation tasks transcribed from the five work packages. Individual assignments and dates are pending team selection. Dependencies below are proposed coordination prerequisites, not measured durations; mock interfaces may unblock parallel work. Validate them during kickoff.
 
+This is the original work-package and acceptance index, not a synchronized
+implementation-status board. The local codebase and experiment evidence have
+advanced since it was drafted; see the root README and
+[experiment log](EXPERIMENT_LOG.md) for what is implemented and measured. A task
+is not considered accepted or closed here unless the team reviews its evidence
+and updates the corresponding GitHub issue.
+
 ## Member 1
 
 [Technical guide](work-packages/member-1.md)

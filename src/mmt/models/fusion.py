@@ -11,8 +11,9 @@ from .source_encoder import EncoderOutput, ModelOutput, SourceBatch, SourceEncod
 
 
 class _FusionBase(nn.Module):
-    def __init__(self, source_dimensions: Mapping[str, int], n_classes: int,
-                 hidden_size: int, dropout: float) -> None:
+    def __init__(
+        self, source_dimensions: Mapping[str, int], n_classes: int, hidden_size: int, dropout: float
+    ) -> None:
         super().__init__()
         if not source_dimensions:
             raise ValueError("at least one source is required")
@@ -32,8 +33,10 @@ class _FusionBase(nn.Module):
     def _encode(self, batches: Mapping[str, SourceBatch]) -> tuple[list[EncoderOutput], int]:
         if set(batches) != set(self.source_order):
             raise ValueError("input sources must exactly match the configured source order")
-        outputs = [encoder(batches[source_id])
-                   for source_id, encoder in zip(self.source_order, self.encoders)]
+        outputs = [
+            encoder(batches[source_id])
+            for source_id, encoder in zip(self.source_order, self.encoders)
+        ]
         batch_sizes = {output.last_state.shape[0] for output in outputs}
         if len(batch_sizes) != 1:
             raise ValueError("all source batches must have the same batch size")
@@ -41,16 +44,20 @@ class _FusionBase(nn.Module):
 
 
 class V1GatedFusion(_FusionBase):
-    def __init__(self, source_dimensions: Mapping[str, int], n_classes: int,
-                 hidden_size: int = 64, dropout: float = 0.1) -> None:
+    def __init__(
+        self,
+        source_dimensions: Mapping[str, int],
+        n_classes: int,
+        hidden_size: int = 64,
+        dropout: float = 0.1,
+    ) -> None:
         super().__init__(source_dimensions, n_classes, hidden_size, dropout)
         self.gates = nn.ModuleList(
             nn.Sequential(nn.Linear(hidden_size + 2, 32), nn.ReLU(), nn.Linear(32, 1))
             for _ in self.source_order
         )
 
-    def forward(self, batches: Mapping[str, SourceBatch],
-                diagnostics: bool = False) -> ModelOutput:
+    def forward(self, batches: Mapping[str, SourceBatch], diagnostics: bool = False) -> ModelOutput:
         encoded, batch_size = self._encode(batches)
         gate_parts = []
         for source_id, output, gate in zip(self.source_order, encoded, self.gates):
@@ -63,7 +70,9 @@ class V1GatedFusion(_FusionBase):
                 output.last_state.dtype
             )
             valid_fraction = (valid_entries / valid_denominator).unsqueeze(-1)
-            gate_parts.append(gate(torch.cat((output.last_state, latest_age, valid_fraction), dim=-1)))
+            gate_parts.append(
+                gate(torch.cat((output.last_state, latest_age, valid_fraction), dim=-1))
+            )
 
         present = torch.stack([output.present for output in encoded], dim=1)
         gate_scores = torch.cat(gate_parts, dim=1)
@@ -73,7 +82,9 @@ class V1GatedFusion(_FusionBase):
         if active_rows.numel():
             active_scores = gate_scores.index_select(0, active_rows)
             active_present = present.index_select(0, active_rows)
-            active_alpha = torch.softmax(active_scores.masked_fill(~active_present, -torch.inf), dim=1)
+            active_alpha = torch.softmax(
+                active_scores.masked_fill(~active_present, -torch.inf), dim=1
+            )
             alpha = alpha.index_copy(0, active_rows, active_alpha)
             states = torch.stack([output.last_state for output in encoded], dim=1)
             active_states = states.index_select(0, active_rows)
@@ -82,14 +93,21 @@ class V1GatedFusion(_FusionBase):
 
         scores = self.classifier(fused).masked_fill(~present.any(dim=1, keepdim=True), 0.0)
         details = {"source_weights": alpha, "source_present": present} if diagnostics else None
-        return ModelOutput(scores=scores, computable=present.any(dim=1),
-                           score_kind="logits", diagnostics=details)
+        return ModelOutput(
+            scores=scores, computable=present.any(dim=1), score_kind="logits", diagnostics=details
+        )
 
 
 class V2AttentionFusion(_FusionBase):
-    def __init__(self, source_dimensions: Mapping[str, int], n_classes: int,
-                 hidden_size: int = 64, dropout: float = 0.1, n_heads: int = 4,
-                 feedforward_size: int = 128) -> None:
+    def __init__(
+        self,
+        source_dimensions: Mapping[str, int],
+        n_classes: int,
+        hidden_size: int = 64,
+        dropout: float = 0.1,
+        n_heads: int = 4,
+        feedforward_size: int = 128,
+    ) -> None:
         super().__init__(source_dimensions, n_classes, hidden_size, dropout)
         if hidden_size % n_heads:
             raise ValueError("hidden_size must be divisible by n_heads")
@@ -107,13 +125,18 @@ class V2AttentionFusion(_FusionBase):
         self.source_embeddings = nn.Parameter(torch.empty(len(self.source_order), hidden_size))
         nn.init.normal_(self.source_embeddings, mean=0.0, std=0.02)
         self.source_attention = nn.TransformerEncoderLayer(
-            d_model=hidden_size, nhead=n_heads, dim_feedforward=feedforward_size,
-            dropout=dropout, activation="relu", batch_first=True, norm_first=False,
-            layer_norm_eps=1e-5, bias=True,
+            d_model=hidden_size,
+            nhead=n_heads,
+            dim_feedforward=feedforward_size,
+            dropout=dropout,
+            activation="relu",
+            batch_first=True,
+            norm_first=False,
+            layer_norm_eps=1e-5,
+            bias=True,
         )
 
-    def forward(self, batches: Mapping[str, SourceBatch],
-                diagnostics: bool = False) -> ModelOutput:
+    def forward(self, batches: Mapping[str, SourceBatch], diagnostics: bool = False) -> ModelOutput:
         encoded, batch_size = self._encode(batches)
         present = torch.stack([output.present for output in encoded], dim=1)
         summaries = encoded[0].last_state.new_zeros(
@@ -131,14 +154,23 @@ class V2AttentionFusion(_FusionBase):
             padding = batches[source_id].padding_mask.index_select(0, active_rows)
             query_rows = query.expand(active_rows.numel(), -1, -1)
             attended, weights = attention(
-                query_rows, states, states, key_padding_mask=padding,
-                need_weights=diagnostics, average_attn_weights=False,
+                query_rows,
+                states,
+                states,
+                key_padding_mask=padding,
+                need_weights=diagnostics,
+                average_attn_weights=False,
             )
             source_summaries = attended[:, 0, :] + self.source_embeddings[source_index]
-            summaries = summaries.index_copy(0, active_rows,
-                                             summaries.index_select(0, active_rows).index_copy(
-                                                 1, torch.tensor([source_index], device=active_rows.device),
-                                                 source_summaries.unsqueeze(1)))
+            summaries = summaries.index_copy(
+                0,
+                active_rows,
+                summaries.index_select(0, active_rows).index_copy(
+                    1,
+                    torch.tensor([source_index], device=active_rows.device),
+                    source_summaries.unsqueeze(1),
+                ),
+            )
             if diagnostics and weights is not None:
                 temporal_weights[source_id] = weights
 
@@ -150,13 +182,16 @@ class V2AttentionFusion(_FusionBase):
             active_transformed = self.source_attention(
                 active_summaries, src_key_padding_mask=~active_present
             )
-            active_transformed = active_transformed.masked_fill(
-                ~active_present.unsqueeze(-1), 0.0
-            )
+            active_transformed = active_transformed.masked_fill(~active_present.unsqueeze(-1), 0.0)
             transformed = transformed.index_copy(0, active_rows, active_transformed)
         source_count = present.sum(dim=1, keepdim=True).clamp_min(1).to(transformed.dtype)
         fused = transformed.sum(dim=1) / source_count
         scores = self.classifier(fused).masked_fill(~present.any(dim=1, keepdim=True), 0.0)
-        details = {"source_present": present, "temporal_attention": temporal_weights} if diagnostics else None
-        return ModelOutput(scores=scores, computable=present.any(dim=1),
-                           score_kind="logits", diagnostics=details)
+        details = (
+            {"source_present": present, "temporal_attention": temporal_weights}
+            if diagnostics
+            else None
+        )
+        return ModelOutput(
+            scores=scores, computable=present.any(dim=1), score_kind="logits", diagnostics=details
+        )

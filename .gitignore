@@ -19,3 +19,4 @@ mlruns/
 dist/
 build/
 *.egg-info/
+docs/ui_test_artifacts/

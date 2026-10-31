@@ -41,9 +41,27 @@ class SelectionTests(unittest.TestCase):
         self.assertEqual(stale.selected_count_before_freshness, 2)
         self.assertEqual(stale.selected_count, 0)
 
+    def test_sorted_fast_path_matches_reference_selector(self):
+        source = {
+            "observation_ids": [5, 3, 4, 2, 1],
+            "values": [[1.0], [2.0], [3.0], [4.0], [5.0]],
+            "valid_mask": [[True], [True], [False], [True], [True]],
+            "event_start": [5.0, 6.0, 6.5, 8.0, 9.0],
+            "event_end": [6.0, 7.0, 7.0, 9.0, 10.0],
+            "available_at": [6.0, 8.0, 7.5, 9.0, 10.0],
+        }
+        decision = {"decision_time": 9.0, "support_start": 6.0, "support_end": 9.0}
+
+        reference = select_observations(source, decision, max_source_age=2.0)
+        optimized = select_observations(source, decision, max_source_age=2.0, assume_sorted=True)
+
+        self.assertEqual(optimized, reference)
+
     def test_rejects_invalid_decision_bounds(self):
         with self.assertRaises(ValueError):
-            select_observations(self.source, {"decision_time": 8.0, "support_start": 5.0, "support_end": 9.0})
+            select_observations(
+                self.source, {"decision_time": 8.0, "support_start": 5.0, "support_end": 9.0}
+            )
 
 
 if __name__ == "__main__":

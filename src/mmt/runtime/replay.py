@@ -9,8 +9,9 @@ from .buffer import BufferError
 from .engine import InferenceEngine, PredictionRecord
 
 
-def replay(engine: InferenceEngine, arrivals: Iterable[Any],
-           decisions: Iterable[Any]) -> Iterator[PredictionRecord]:
+def replay(
+    engine: InferenceEngine, arrivals: Iterable[Any], decisions: Iterable[Any]
+) -> Iterator[PredictionRecord]:
     """Merge one sequence with one-item arrival lookahead; both inputs must be sorted."""
     arrival_iter = iter(arrivals)
     next_arrival = next(arrival_iter, None)
@@ -26,16 +27,29 @@ def replay(engine: InferenceEngine, arrivals: Iterable[Any],
         elif sequence_id != active_sequence:
             raise BufferError("unsupported_profile", "replay handles one sequence per invocation")
         if prior_decision_time is not None and decision_time <= prior_decision_time:
-            raise BufferError("invalid_decision_order", "replay decisions must be strictly chronological")
+            raise BufferError(
+                "invalid_decision_order", "replay decisions must be strictly chronological"
+            )
         prior_decision_time = decision_time
 
-        while next_arrival is not None and float(_field(next_arrival, "available_at")) <= decision_time:
+        while (
+            next_arrival is not None
+            and float(_field(next_arrival, "available_at")) <= decision_time
+        ):
             if str(_field(next_arrival, "sequence_id")) != active_sequence:
-                raise BufferError("unsupported_profile", "replay arrivals must belong to the decision sequence")
-            key = (float(_field(next_arrival, "available_at")),
-                   str(_field(next_arrival, "source_id")), int(_field(next_arrival, "observation_id")))
+                raise BufferError(
+                    "unsupported_profile", "replay arrivals must belong to the decision sequence"
+                )
+            key = (
+                float(_field(next_arrival, "available_at")),
+                str(_field(next_arrival, "source_id")),
+                int(_field(next_arrival, "observation_id")),
+            )
             if prior_arrival_key is not None and key < prior_arrival_key:
-                raise BufferError("invalid_arrival_order", "replay arrivals must be sorted by availability and identity")
+                raise BufferError(
+                    "invalid_arrival_order",
+                    "replay arrivals must be sorted by availability and identity",
+                )
             prior_arrival_key = key
             engine.update(next_arrival)
             next_arrival = next(arrival_iter, None)

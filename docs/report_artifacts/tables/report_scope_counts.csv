@@ -1,0 +1,15 @@
+evidence,count
+Trained runs,18
+Original clean rows,36
+Calibration records,18
+Failed-fit T=1 fallbacks,6
+Disabled abstention policies,18
+Robustness/baseline rows,230
+Saved paired comparisons,204
+Replay runs,54
+Model/decision replay records,236655
+Batch32 numerical rechecks,563
+Saved study figures,11
+Descriptive threshold points,3636
+Clean class metric rows,252
+Robustness confusion statuses,230

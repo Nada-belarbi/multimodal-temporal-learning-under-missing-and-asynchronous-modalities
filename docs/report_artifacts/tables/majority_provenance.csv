@@ -1,0 +1,3 @@
+application,eligible_train_decisions,fit_partition,input_guard,score_kind,selected_class,class_counts.0,class_counts.1,class_counts.10,class_counts.11,class_counts.2,class_counts.3,class_counts.4,class_counts.5,class_counts.6,class_counts.7,class_counts.8,class_counts.9
+mosi,1230,train,any effective source present,label_only,1,552,678,,,,,,,,,,
+pamap2,6858,train,any effective source present,label_only,3,713,679,905.0,141.0,685.0,949.0,283.0,473.0,549.0,422.0,396.0,663.0

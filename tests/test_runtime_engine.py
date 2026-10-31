@@ -7,16 +7,24 @@ from mmt.runtime.replay import replay
 
 def observation(observation_id, available_at, value=1.0, sequence_id="sequence"):
     return {
-        "sequence_id": sequence_id, "source_id": "source", "observation_id": observation_id,
-        "values": [value], "valid_mask": [True], "event_start": available_at,
-        "event_end": available_at, "available_at": available_at,
+        "sequence_id": sequence_id,
+        "source_id": "source",
+        "observation_id": observation_id,
+        "values": [value],
+        "valid_mask": [True],
+        "event_start": available_at,
+        "event_end": available_at,
+        "available_at": available_at,
     }
 
 
 def decision(decision_id, decision_time, sequence_id="sequence"):
     return {
-        "sequence_id": sequence_id, "decision_id": decision_id, "decision_time": decision_time,
-        "support_start": 0.0, "support_end": decision_time,
+        "sequence_id": sequence_id,
+        "decision_id": decision_id,
+        "decision_time": decision_time,
+        "support_start": 0.0,
+        "support_end": decision_time,
     }
 
 
@@ -40,8 +48,10 @@ class RuntimeEngineTests(unittest.TestCase):
 
     def test_no_data_does_not_call_the_model_or_fabricate_probabilities(self):
         engine = InferenceEngine(
-            source_ids=("source",), batch_builder=lambda selections: selections,
-            predict_fn=lambda _: self.fail("model must not run without selected observations"), n_classes=2,
+            source_ids=("source",),
+            batch_builder=lambda selections: selections,
+            predict_fn=lambda _: self.fail("model must not run without selected observations"),
+            n_classes=2,
         )
 
         prediction = engine.predict(decision("d1", 2.0))
@@ -63,13 +73,21 @@ class RuntimeEngineTests(unittest.TestCase):
         engine.update(observation(1, 1.0))
 
         with self.assertRaises(BufferError):
-            engine.predict({"sequence_id": "sequence", "decision_id": "bad", "decision_time": 3.0,
-                            "support_start": 2.0, "support_end": 4.0})
+            engine.predict(
+                {
+                    "sequence_id": "sequence",
+                    "decision_id": "bad",
+                    "decision_time": 3.0,
+                    "support_start": 2.0,
+                    "support_end": 4.0,
+                }
+            )
         self.assertEqual(engine.buffer.row_count, 1)
 
     def test_threshold_keeps_candidate_scores_on_abstention(self):
-        prediction = list(replay(make_engine(threshold=0.9), [observation(1, 1.0)],
-                                 [decision("d1", 1.0)]))[0]
+        prediction = list(
+            replay(make_engine(threshold=0.9), [observation(1, 1.0)], [decision("d1", 1.0)])
+        )[0]
 
         self.assertEqual(prediction.status, "abstained_low_confidence")
         self.assertFalse(prediction.accepted)
@@ -96,9 +114,17 @@ class RuntimeEngineTests(unittest.TestCase):
 
     def test_reset_advances_prediction_generation(self):
         engine = InferenceEngine(
-            source_ids=("source",), batch_builder=lambda selections: selections,
-            predict_fn=lambda _: {"scores": [[1.0, 0.0]], "computable": [True], "score_kind": "logits"},
-            n_classes=2, session_id="session", run_id="run", scenario_id="clean",
+            source_ids=("source",),
+            batch_builder=lambda selections: selections,
+            predict_fn=lambda _: {
+                "scores": [[1.0, 0.0]],
+                "computable": [True],
+                "score_kind": "logits",
+            },
+            n_classes=2,
+            session_id="session",
+            run_id="run",
+            scenario_id="clean",
         )
         engine.update(observation(1, 1.0))
         first = engine.predict(decision("d1", 1.0))
@@ -106,14 +132,18 @@ class RuntimeEngineTests(unittest.TestCase):
         engine.update(observation(1, 1.0))
         second = engine.predict(decision("d1", 1.0))
 
-        self.assertEqual((first.session_id, first.generation, first.run_id, first.scenario_id),
-                         ("session", 0, "run", "clean"))
+        self.assertEqual(
+            (first.session_id, first.generation, first.run_id, first.scenario_id),
+            ("session", 0, "run", "clean"),
+        )
         self.assertEqual(second.generation, 1)
 
     def test_model_exception_is_not_reported_as_no_data(self):
         engine = InferenceEngine(
-            source_ids=("source",), batch_builder=lambda selections: selections,
-            predict_fn=lambda _: (_ for _ in ()).throw(ValueError("bad model")), n_classes=2,
+            source_ids=("source",),
+            batch_builder=lambda selections: selections,
+            predict_fn=lambda _: (_ for _ in ()).throw(ValueError("bad model")),
+            n_classes=2,
         )
         engine.update(observation(1, 1.0))
 

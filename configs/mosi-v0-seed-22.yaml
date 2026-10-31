@@ -1,0 +1,37 @@
+data:
+  application: mosi
+  manifest_path: ../data/prepared/mosi/native-offline-glove6b300-2026-10-27-v2/manifest.json
+  partitions_path: ../data/prepared/mosi/native-offline-glove6b300-2026-10-27-v2/partitions.csv
+  source_schema:
+    language: 300
+    audio: 74
+    visual: 35
+  decision_policy: segment
+  availability_mode: offline
+  feature_order:
+  - language
+  - audio
+  - visual
+  normalizer_ref: ../data/raw/mosi/provenance/2026-10-27/native-offline-glove6b300-2026-10-27-v2/normalizer.npz
+run:
+  run_id: mosi-v0-offline-glove6b300-seed-22-2026-10-27
+  model_name: v0
+  seed: 22
+  regime: clean
+  partition_hashes:
+    calibration: 1305d31d427b2ebcbe2c37c4ea0db086c05f898d7b26dab50d66eb3dcfa1461e
+    test: f7cc2d9057b0135fdc7a52ca819074f800ef0dd12207e8533360c91154ecd5f2
+    train: d9ec7097850ab9783913e07021172f15a6a935e8dccb06a23a5988c0e2bb35be
+    validation: 81fc686d7525eb107f3e087a91e840763c9eb0446683100441c4433f09b05924
+  model_config:
+    hidden_size: 64
+    dropout: 0.1
+    epsilon: 1.0e-08
+  training:
+    batch_size: 32
+    max_epochs: 100
+    patience: 10
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    gradient_clip_norm: 1.0
+  output_root: ../runs

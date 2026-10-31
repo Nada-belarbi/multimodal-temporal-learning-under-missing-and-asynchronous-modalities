@@ -3,8 +3,15 @@ import unittest
 from mmt.runtime.buffer import BufferError, InsertResult, ObservationBuffer
 
 
-def observation(observation_id, event_start, event_end, available_at, value=1.0,
-                sequence_id="sequence", source_id="source"):
+def observation(
+    observation_id,
+    event_start,
+    event_end,
+    available_at,
+    value=1.0,
+    sequence_id="sequence",
+    source_id="source",
+):
     return {
         "sequence_id": sequence_id,
         "source_id": source_id,

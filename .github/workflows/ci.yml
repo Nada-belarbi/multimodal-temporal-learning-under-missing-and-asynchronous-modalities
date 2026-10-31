@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked project and development tools
+        run: uv sync --locked --extra dev --extra ui
+
+      - name: Lint
+        run: uv run --locked ruff check src/mmt tests
+
+      - name: Check formatting
+        run: uv run --locked ruff format --check src/mmt tests
+
+      - name: Run dataset-independent tests
+        run: uv run --locked python -m pytest tests -m "not dataset and not slow"
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Install wheel outside the repository
+        run: |
+          uv venv --python 3.11 /tmp/mmt-wheel-verify
+          uv pip install --python /tmp/mmt-wheel-verify/bin/python dist/*.whl
+          /tmp/mmt-wheel-verify/bin/python -c "import mmt, numpy, torch; print(mmt.__version__, numpy.__version__, torch.__version__)"
+          /tmp/mmt-wheel-verify/bin/mmt --help
